@@ -26,6 +26,14 @@ javac -d bin -sourcepath src -encoding UTF-8 !javafiles!
 
 if %ERRORLEVEL% EQU 0 (
     echo.
+    echo Copie des ressources...
+    if exist "resources" (
+        if not exist "bin\resources" mkdir bin\resources
+        xcopy /S /Y "resources\*.*" "bin\resources\"
+        echo ✓ Ressources copiees
+    )
+    
+    echo.
     echo ========================================
     echo Compilation reussie!
     echo Les fichiers compiles sont dans: bin\motorola\
