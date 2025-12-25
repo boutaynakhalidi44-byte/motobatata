@@ -80,7 +80,7 @@ public class AddressingMode {
     public static int indexedGeneric(CPU cpu) {
         int postbyte = cpu.fetchByte();
         int regIndex = (postbyte >> 6) & 0x03;  // Extraire RR (bits 7-6)
-        
+
         int regValue;
         switch (regIndex) {
             case 0: regValue = cpu.getRegX(); break;
@@ -89,10 +89,23 @@ public class AddressingMode {
             case 3: regValue = cpu.getRegS(); break;
             default: regValue = cpu.getRegX();
         }
-        
+
         int address = decodeIndexedAddress(cpu, postbyte, regValue, regIndex);
         System.out.printf("DEBUG indexedGeneric: postbyte=0x%02X, regIndex=%d, regValue=0x%04X, calculated_address=0x%04X\n", 
             postbyte, regIndex, regValue, address);
+
+        // Si le postbyte indique un mode indirect indexé sans offset ([,X]) ou avec offset
+        // (E bit = 1 and mode nibble == 0x04 for no-offset indirect), alors déréférencer
+        // l'adresse calculée pour obtenir l'adresse finale (16-bit pointer stored at address).
+        boolean isIndirectOrSpecial = (postbyte & 0x10) != 0;
+        int mode = postbyte & 0x0F;
+        if (isIndirectOrSpecial && mode == 0x04) {
+            // Lire le mot pointeur à l'adresse indexée
+            int finalAddr = cpu.getMemory().readWord(address) & 0xFFFF;
+            System.out.printf("DEBUG indexedGeneric: indirect indexed -> pointer at 0x%04X = 0x%04X\n", address, finalAddr);
+            return finalAddr;
+        }
+
         return address;
     }
     

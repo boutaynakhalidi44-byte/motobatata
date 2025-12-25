@@ -24,12 +24,15 @@ public class InstructionDecoder {
         instructions.put(0x32, new LEASInstruction("LEAS", LEASInstruction.INDEXED));
         instructions.put(0x33, new LEAUInstruction("LEAU", LEAUInstruction.INDEXED));
         
-        instructions.put(0x39, new RTSInstruction());
-        instructions.put(0x3B, new RTIInstruction());
+    // RTS/RTI removed per request
         instructions.put(0x3A, new ABXInstruction());
         instructions.put(0x3D, new MULInstruction());
         instructions.put(0x19, new DAAInstruction());
         instructions.put(0x3F, new HALTInstruction("HALT"));  // Arrête le CPU
+        
+        // EXG - Exchange (opcode 0x1E, postbyte contient les registres à échanger)
+        // Ce n'est qu'un marqueur, le vrai décodage se fait dans decode()
+        instructions.put(0x1E, new EXGInstruction("", ""));  // Sera remplacé par decode()
         
         // TFR - Transfer (opcode 0x1F, postbyte contient les registres src et dest)
         // Ce n'est qu'un marqueur, le vrai décodage se fait dans decode()
@@ -197,12 +200,7 @@ public class InstructionDecoder {
         instructions.put(0x40, new NEGInstruction("NEGA", NEGInstruction.DIRECT));
         instructions.put(0x50, new NEGInstruction("NEGB", NEGInstruction.DIRECT));
         
-        // COM (03, 63, 73)
-        instructions.put(0x03, new COMInstruction("COM", COMInstruction.DIRECT));
-        instructions.put(0x63, new COMInstruction("COM", COMInstruction.INDEXED_X));
-        instructions.put(0x73, new COMInstruction("COM", COMInstruction.EXTENDED));
-        instructions.put(0x43, new COMInstruction("COMA", COMInstruction.DIRECT));
-        instructions.put(0x53, new COMInstruction("COMB", COMInstruction.DIRECT));
+    // COM instruction removed
         
         // DEC (0A, 6A, 7A)
         instructions.put(0x0A, new DECInstruction("DEC", DECInstruction.DIRECT));
@@ -329,29 +327,30 @@ public class InstructionDecoder {
         instructions.put(0x2F, new BLEInstruction());
         instructions.put(0x8D, new BSRInstruction());
 
-        // ================================================
-        // Instructions JMP et JSR
-        // ================================================
-        instructions.put(0x6E, new JMPInstruction("JMP", JMPInstruction.INDEXED_X));
-        instructions.put(0x7E, new JMPInstruction("JMP", JMPInstruction.EXTENDED));
-        instructions.put(0xAD, new JSRInstruction("JSR", JSRInstruction.INDEXED));
-        instructions.put(0xBD, new JSRInstruction("JSR", JSRInstruction.EXTENDED));
+    // JMP and JSR removed
 
-        // ================================================
-        // Instructions de rotation/décalage
-        // ================================================
-        instructions.put(0x47, new ASRInstruction("ASRA", true));
-        instructions.put(0x57, new ASRInstruction("ASR", false));
-        instructions.put(0x44, new LSRInstruction("LSRA", true));
-        instructions.put(0x54, new LSRInstruction("LSR", false));
-        instructions.put(0x49, new ROLInstruction("ROLA", true));
-        instructions.put(0x59, new ROLInstruction("ROL", false));
-        instructions.put(0x46, new RORInstruction("RORA", true));
-        instructions.put(0x56, new RORInstruction("ROR", false));
-        instructions.put(0x48, new LSLInstruction("LSLA", true));
-        instructions.put(0x58, new LSLInstruction("LSL", false));
+
+
     }
-
+    
+    /**
+     * Convertit un code de registre (0-8) en nom de registre
+     */
+    private static String getRegisterName(int code) {
+        switch (code) {
+            case 0: return "A";
+            case 1: return "B";
+            case 2: return "CC";
+            case 3: return "DP";
+            case 4: return "D";
+            case 5: return "X";
+            case 6: return "Y";
+            case 7: return "U";
+            case 8: return "S";
+            default: return "";
+        }
+    }
+    
     /**
      * Décode l'instruction à partir de l'opcode
      * @param opcode L'opcode de l'instruction
@@ -359,6 +358,26 @@ public class InstructionDecoder {
      * @return L'instruction décodée, ou null si l'opcode est inconnu
      */
     public static Instruction decode(int opcode, CPU cpu) {
+        // Gestion de EXG (0x1E) - Exchange registers
+        if (opcode == 0x1E) {
+            int postbyte = cpu.fetchByte() & 0xFF;
+            int reg1Code = (postbyte >> 4) & 0xF;
+            int reg2Code = postbyte & 0xF;
+            String reg1 = getRegisterName(reg1Code);
+            String reg2 = getRegisterName(reg2Code);
+            return new EXGInstruction(reg1, reg2);
+        }
+        
+        // Gestion de TFR (0x1F) - Transfer register
+        if (opcode == 0x1F) {
+            int postbyte = cpu.fetchByte() & 0xFF;
+            int srcCode = (postbyte >> 4) & 0xF;
+            int destCode = postbyte & 0xF;
+            String src = getRegisterName(srcCode);
+            String dest = getRegisterName(destCode);
+            return new TFRInstruction(src, dest);
+        }
+        
         // Gestion du mode EXTENDED INDIRECT (marqueur 0x04)
         if (opcode == 0x04) {
             //System.out.println("DEBUG Decoder: EXTENDED INDIRECT marker 0x04 detected");

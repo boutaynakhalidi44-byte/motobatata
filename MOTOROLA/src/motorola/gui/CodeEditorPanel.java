@@ -16,7 +16,8 @@ public class CodeEditorPanel extends JPanel {
         // Editor area
         editor = new JTextArea();
         editor.setFont(new Font("Monospaced", Font.PLAIN, 14));
-        editor.setBackground(new Color(210, 185, 160));
+    // even lighter baby pink background for the assembler code area
+    editor.setBackground(new Color(255, 245, 251));
         editor.setForeground(new Color(40, 20, 5));
         editor.setCaretColor(new Color(40, 20, 5));
 

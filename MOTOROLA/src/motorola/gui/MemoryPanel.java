@@ -28,8 +28,9 @@ public class MemoryPanel extends JPanel {
         addrLabel.setFont(new Font("Monospaced", Font.BOLD, 11));
         addrLabel.setForeground(new Color(40, 20, 5));
         addressField = new JTextField("0000", 10);
-        addressField.setFont(Theme.FONT_NORMAL);
-        addressField.setBackground(new Color(230, 210, 185));
+    addressField.setFont(Theme.FONT_NORMAL);
+    // even lighter baby pink background for the address field
+    addressField.setBackground(new Color(255, 245, 251));
         addressField.setForeground(new Color(40, 20, 5));
         
         JButton goButton = new JButton("Aller");
@@ -50,9 +51,10 @@ public class MemoryPanel extends JPanel {
 
         // Text area - READ ONLY
         area = new JTextArea(ROWS_TO_DISPLAY, 60);
-        area.setFont(new Font("Monospaced", Font.PLAIN, 11));
+    area.setFont(new Font("Monospaced", Font.PLAIN, 11));
         area.setEditable(false);  // Ensure it's completely read-only
-        area.setBackground(new Color(210, 185, 160));
+    // even lighter baby pink background for the memory dump area
+    area.setBackground(new Color(255, 245, 251));
         area.setForeground(new Color(40, 20, 5));
         area.setLineWrap(false);
 

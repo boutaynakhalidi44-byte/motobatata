@@ -116,7 +116,7 @@ public class SimulatorFrame extends JFrame {
             "7. Vous pouvez ajouter des points d'arrêt\n\n" +
             "Instructions supportées: LDA, LDB, LDD, STA, STB, STD,\n" +
             "ADDA, ADDB, ADDD, SUBA, SUBB, SUBD, CMP, CMPD,\n" +
-            "BRA, BEQ, BNE, LBRA, LBSR, JSR, RTS, et bien d'autres...\n\n" +
+            "BRA, BEQ, BNE et autres branchements (LBRA/LBSR/JSR/RTS supprimés).\n\n" +
             "Exemple de code:\n" +
             "  LDA #$10\n" +
             "  ADDA #$05\n" +
